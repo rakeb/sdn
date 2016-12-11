@@ -1,7 +1,5 @@
 package org.sdnhub.odl.tutorial.tapapp.impl;
 
-import java.awt.Event;
-import java.awt.event.ActionEvent;
 import java.math.BigInteger;
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -11,33 +9,21 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
-
-import javax.xml.ws.handler.PortInfo;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-//import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-//import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.ControllerActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.DropActionCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.FloodActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.OutputActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwDstActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwSrcActionCaseBuilder;
@@ -45,19 +31,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.acti
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetNwTtlActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpDstActionCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.SetTpSrcActionCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.controller.action._case.ControllerActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.drop.action._case.DropActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.flood.action._case.FloodActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.output.action._case.OutputActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.field._case.SetField;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.dst.action._case.SetNwDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.src.action._case.SetNwSrcActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.tos.action._case.SetNwTosActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.nw.ttl.action._case.SetNwTtlActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.tp.dst.action._case.SetTpDstActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.action.set.tp.src.action._case.SetTpSrcActionBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.Action;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.action.types.rev131112.action.list.ActionKey;
@@ -72,43 +53,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.ta
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.tables.table.FlowKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.RemoveFlowInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowModFlags;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.MatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.MeterCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.apply.actions._case.ApplyActionsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.meter._case.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.Instruction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.list.InstructionKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.Meter;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.MeterKey;
-/*
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.StaleMeter;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.StaleMeterBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.StaleMeterKey;
-*/
-import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.AddMeterInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.RemoveMeterInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.service.rev130918.UpdateMeterInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterBandType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterFlags;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.band.type.DropBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.MeterBandHeaders;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.MeterBandHeadersBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.meter.band.headers.MeterBandHeader;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.meter.band.headers.MeterBandHeaderBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.meter.band.headers.meter.band.header.MeterBandTypes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.meter.band.headers.meter.band.header.MeterBandTypesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.band.type.Drop;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.band.type.band.type.DropBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRemoved;
@@ -123,50 +76,28 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.No
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.AddTapInput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.AddTapOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.AddTapOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.CheckingInput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.CheckingOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.CheckingOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.ConnectedHosts;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.CookieToFlowid;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.CookieToFlowidBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.EventActions;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.FieldType;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllHostsOnSwitchInput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllHostsOnSwitchOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllHostsOnSwitchOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllLinksOfSwitchInput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllLinksOfSwitchOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllLinksOfSwitchOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllSwitchesOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllSwitchesOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetNetworkTopologyOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetNetworkTopologyOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.HostInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterId;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallFlowInput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallFlowInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallFlowOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallFlowOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallFlowRepository;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathBwNodesInput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathBwNodesInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathBwNodesOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathBwNodesOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathInput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.LocalIpv4Prefix;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MovePathInput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MovePathOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MovePathOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MutateIpInput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MutateIpOutput;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MutateIpOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.NetworkLink;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.NodeNeighbors;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.NodeNeighborsBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
+import org.opendaylight.yangtools.concepts.Registration;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.sdnhub.odl.tutorial.utils.GenericTransactionUtils;
+import org.sdnhub.odl.tutorial.utils.inventory.InventoryUtils;
+import org.sdnhub.odl.tutorial.utils.openflow13.MatchUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+//import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.ProtocolInfo;
+//import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.ProtocolInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.RemoveAFlowFromSwitchInput;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.RemoveAFlowFromSwitchOutput;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.RemoveAFlowFromSwitchOutputBuilder;
@@ -176,98 +107,100 @@ import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.Remove
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.RemoveAllTapsFromSwitchInput;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.RemoveAllTapsFromSwitchOutput;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.RemoveAllTapsFromSwitchOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.mutate.ip.input.mutation.end.BothCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.mutate.ip.input.mutation.end.DstOnlyCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathBwNodesInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.mutate.ip.input.mutation.end.SourceOnlyCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MutateIpOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.SetDstIpv4AddressCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.set.dst.ipv4.address._case.SetDstIpv4AddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.SetSourceIpv4AddressCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.set.source.ipv4.address._case.SetSourceIpv4AddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallFlowInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathBwNodesInput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathBwNodesOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathBwNodesOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MovePathInput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MovePathOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MovePathOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MutateIpInput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MutateIpOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.install.flow.input.NewFlowBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.ForwardToPortCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.forward.to.port._case.ForwardToPortBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.install.flow.input.AssociatedActionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathInput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallPathOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.curr.node.NeighborsBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.CurrNodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.connected.hosts.ConnectedHostKey;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.ConnectedHosts;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.LocalIpv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.connected.hosts.ConnectedHost;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.curr.node.NeighborsKey;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.CurrNodeKey;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.CurrNode;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.curr.node.Neighbors;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.RemoveFlowsFromSwitchInput;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.RemoveFlowsFromSwitchOutput;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.RemoveFlowsFromSwitchOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.TapSpecBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.TrafficType;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.event.actions.TapActions;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.event.actions.tap.actions.BlockCase;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.event.actions.tap.actions.NotifyCase;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.forward.to.controller._case.*;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.forward.to.flood._case.ForwardToFloodBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.forward.to.port._case.ForwardToPortBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.set.dst.ipv4.address._case.SetDstIpv4AddressBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.set.source.ipv4.address._case.SetSourceIpv4AddressBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.*;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.*;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MalEvents;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.MalEventsBuilder;
-
-//import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.ProtocolInfo;
-//import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.ProtocolInfoBuilder;
-
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.TapService;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.TapSpec;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.getallhostsonswitch.output.HostsInfo;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.CheckingInput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.CheckingOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.CheckingOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllHostsOnSwitchInput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllHostsOnSwitchOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetNetworkTopologyOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.getnetworktopology.output.NetworkLinksBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.getnetworktopology.output.NetworkLinks;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllLinksOfSwitchInput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllLinksOfSwitchOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllLinksOfSwitchOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllSwitchesOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetAllSwitchesOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.GetNetworkTopologyOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallFlowOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallFlowOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.SetIpv4TtlCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.SetTcpDstPortCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.SetTcpSrcPortCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.SetIpv4TosCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.SetDstIpv4AddressCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.SetSourceIpv4AddressCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.DropPacketCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.ForwardToFloodCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.ForwardToControllerCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.ForwardToPortCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.flow.actions.SetRateLimitCase;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.install.flow.input.AssociatedActions;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.install.flow.input.NewFlow;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.AddTapOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.add.tap.input.Tap1;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.connected.hosts.ConnectedHost;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.connected.hosts.ConnectedHostKey;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.AddTapInput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.AddTapOutput;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.cookie.to.flowid.CookieKey;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.cookie.to.flowid.Cookie;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.cookie.to.flowid.CookieBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.cookie.to.flowid.CookieKey;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.flow.actions.FlowActions;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.getallhostsonswitch.output.HostsInfo;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.getallhostsonswitch.output.HostsInfoBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.getnetworktopology.output.NetworkLinks;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.getnetworktopology.output.NetworkLinksBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.install.flow.input.AssociatedActions;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.install.flow.input.AssociatedActionsBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.install.flow.input.NewFlow;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.install.flow.input.NewFlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.install.flow.repository.NewFlow1;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.mal.events.MalEvent;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.mal.events.MalEventBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.mutate.ip.input.mutation.end.BothCase;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.mutate.ip.input.mutation.end.DstOnlyCase;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.mutate.ip.input.mutation.end.SourceOnlyCase;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.CurrNode;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.CurrNodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.CurrNodeKey;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.curr.node.Neighbors;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.curr.node.NeighborsBuilder;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.node.neighbors.curr.node.NeighborsKey;
-import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.tap.spec.Tap;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.tap.spec.TapBuilder;
 import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.tap.spec.TapKey;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Link;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpSourceHardwareAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.arp.match.fields.ArpTargetHardwareAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetTypeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.ArpMatch;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.ConnectionCookie;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketInReason;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.PacketReceived;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.service.rev130709.packet.received.Match;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.table.types.rev131026.TableId;
-
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.tap.spec.Tap;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.CookieToFlowid;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.CookieToFlowidBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.InstallFlowRepository;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.NodeNeighbors;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.NodeNeighborsBuilder;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.TapService;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.TapSpec;
+import org.opendaylight.yang.gen.v1.urn.sdnhub.tutorial.odl.tap.rev150601.TapSpecBuilder;
 //import org.opendaylight.yang.gen.v1.urn.opendaylight.packet.arp.rev140528.ArpPacketReceived;
-
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.Augmentation;
-import org.opendaylight.yangtools.yang.binding.DataContainer;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.sdnhub.odl.tutorial.utils.GenericTransactionUtils;
-import org.sdnhub.odl.tutorial.utils.inventory.InventoryUtils;
-import org.sdnhub.odl.tutorial.utils.openflow13.MatchUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+/*
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.StaleMeter;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.StaleMeterBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.meters.StaleMeterKey;
+*/
 
 interface RepeatFunction {
 	InstallFlowInput performFunction (NodeConnectorId outputPort, Ipv4Prefix dstIp, NodeId nodeid);
@@ -356,7 +289,8 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
         }
         for (NodeId nodeId : tapsInstalled.keySet()){
         	for (String tapId: tapsInstalled.get(nodeId)){
-                String flowIdStr = "Tap_" + tapId + "_NodeID_" + nodeId.getValue();
+                //String flowIdStr = "Tap_" + tapId + "_NodeID_" + nodeId.getValue();
+        		String flowIdStr = tapId;
                 //remove tap from tap-spec datastore	
                 InstanceIdentifier<Tap> tapIID = InstanceIdentifier.builder(TapSpec.class)
                 		.child(Tap.class, new TapKey(tapId))
@@ -398,9 +332,9 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
             ListenerRegistration<DataChangeListener> registration = dataBroker.registerDataChangeListener(
                     LogicalDatastoreType.CONFIGURATION,
                     iid, this, AsyncDataBroker.DataChangeScope.SUBTREE);
-            LOG.debug("         ---------------------------------------------------------------------     ");
-            LOG.debug("DataChangeListener registered with MD-SAL for path {}", iid);
-            LOG.debug("         ---------------------------------------------------------------------     ");
+//            LOG.debug("         ---------------------------------------------------------------------     ");
+//            LOG.debug("DataChangeListener registered with MD-SAL for path {}", iid);
+//            LOG.debug("         ---------------------------------------------------------------------     ");
             this.registrations.add(registration);
             //this.registrations.add(registration);
 
@@ -412,8 +346,8 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
     /////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {   	
-        LOG.debug("Data changed: {} created, {} updated, {} removed",
-                change.getCreatedData().size(), change.getUpdatedData().size(), change.getRemovedPaths().size());
+//        LOG.debug("Data changed: {} created, {} updated, {} removed",
+//                change.getCreatedData().size(), change.getUpdatedData().size(), change.getRemovedPaths().size());
         DataObject dataObject;
        
         // Iterate over any created nodes or interfaces
@@ -421,7 +355,7 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
         
         for (Map.Entry<InstanceIdentifier<?>, DataObject> entry : change.getCreatedData().entrySet()) {
             dataObject = entry.getValue();
-            LOG.debug("ADDED Path {}, Object {}", entry.getKey(), dataObject);
+//            LOG.debug("ADDED Path {}, Object {}", entry.getKey(), dataObject);
             if (dataObject instanceof Tap){
             	programTap((Tap)dataObject);
             }
@@ -434,7 +368,7 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
         Map<InstanceIdentifier<?>, DataObject> originalData = change.getOriginalData();
         for (InstanceIdentifier<?> path : change.getRemovedPaths()) {
             dataObject = originalData.get(path);
-            LOG.debug("REMOVED Path {}, Object {}", path, dataObject);
+//            LOG.debug("REMOVED Path {}, Object {}", path, dataObject);
             if (dataObject instanceof Tap){
             	removeTap((Tap)dataObject);
             }
@@ -446,7 +380,7 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
         for (Map.Entry<InstanceIdentifier<?>, DataObject> entry : change.getUpdatedData().entrySet()) {
             dataObject = entry.getValue();
             DataObject originalDataObject = originalData.get(entry.getKey());
-            LOG.debug("UPDATED Path {}, New Object {}, Old Object {}", entry.getKey(), dataObject, originalDataObject);
+//            LOG.debug("UPDATED Path {}, New Object {}, Old Object {}", entry.getKey(), dataObject, originalDataObject);
         }
        
     }
@@ -455,9 +389,9 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
 
         NodeId nodeId = tap.getNode();
         String tapId = tap.getId();
-        LOG.debug("         ---------------------------------------------------------------------     ");
-		LOG.debug("ProgramTap is called for Node {}", nodeId);
-		LOG.debug("         ---------------------------------------------------------------------     ");
+//        LOG.debug("         ---------------------------------------------------------------------     ");
+//		LOG.debug("ProgramTap is called for Node {}", nodeId);
+//		LOG.debug("         ---------------------------------------------------------------------     ");
         //Creating match object
         MatchBuilder matchBuilder = new MatchBuilder();   
         
@@ -611,9 +545,9 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
         
         boolean cookieAdded = GenericTransactionUtils.writeData(dataBroker, LogicalDatastoreType.CONFIGURATION, cookieIID, cookie, true);
         if (cookieAdded == true){
-        	LOG.debug("         ---------------------------------------------------------------------     ");
-    		LOG.debug("Cookied is successfully added {}", flowck.toString());
-    		LOG.debug("         ---------------------------------------------------------------------     ");
+//        	LOG.debug("         ---------------------------------------------------------------------     ");
+//    		LOG.debug("Cookied is successfully added {}", flowck.toString());
+//    		LOG.debug("         ---------------------------------------------------------------------     ");
         }
             
             /*
@@ -691,23 +625,93 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
     /////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void onNodeRemoved(NodeRemoved nodeRemoved) {
-        LOG.debug("Node removed {}", nodeRemoved);
+//        LOG.debug("Node removed {}", nodeRemoved);
         
       //Remove all flows using RPC call to MD-SAL Flow Service
-        //RemoveFlowInputBuilder flowBuilder = new RemoveFlowInputBuilder()
-        //    .setBarrier(true)
-        //    .setNode(nodeRemoved.getNodeRef());
-        //salFlowService.removeFlow(flowBuilder.build());
+        NodeId nodeId = nodeRemoved.getNodeRef().getValue().firstKeyOf(Node.class).getId();
+        //InstanceIdentifier<Node> nodeIID = InstanceIdentifier.builder(Nodes.class)
+        //		.child(Node.class, new NodeKey(nodeId))
+        //		.build();
+        //NodeBuilder nodeBuilder = new NodeBuilder(); 
+        //GenericTransactionUtils.writeData(dataBroker, LogicalDatastoreType.CONFIGURATION, nodeIID, nodeBuilder.build(), false);
+//        LOG.debug("   ************************************************    ");
+//        LOG.debug(" Node ID     =     "    + nodeId.getValue());
+//        LOG.debug("   ************************************************    ");
+        
+        if (flowsInstalled.containsKey(nodeId)){
+        	for (String flowId: flowsInstalled.get(nodeId)){
+                String flowIdStr = flowId;
+                	
+            	FlowBuilder flowBuilder = new FlowBuilder();
+            	FlowKey key = new FlowKey(new FlowId(flowIdStr));
+            	flowBuilder.setFlowName(flowIdStr);
+            	flowBuilder.setKey(key);
+            	flowBuilder.setId(new FlowId(flowIdStr));
+            	flowBuilder.setTableId((short)0);
+                	
+            	InstanceIdentifier<Flow> flowIID = InstanceIdentifier.builder(Nodes.class)
+            			.child(Node.class, new NodeKey(nodeId))
+            			.augmentation(FlowCapableNode.class)
+            			.child(Table.class, new TableKey(flowBuilder.getTableId()))
+            			.child(Flow.class, new FlowKey(flowBuilder.getKey()))
+            			.build();
+                	
+            	boolean result = GenericTransactionUtils.writeData(dataBroker, LogicalDatastoreType.CONFIGURATION, flowIID, flowBuilder.build(), false);
+            	if (result == true) {
+//            		LOG.debug("   ************************************************    ");
+//                    LOG.debug(" Flow is removed with ID     =     "    + flowId);
+//                    LOG.debug("   ************************************************    ");
+                    
+            	}
+            	else {
+//            		LOG.debug("   ************************************************    ");
+//                    LOG.debug(" No Flow exists with ID     =     "    + flowId);
+//                    LOG.debug("   ************************************************    ");
+            	}
+            }
+        	flowsInstalled.remove(nodeId);
+        }
+        /////////////////////////////////////////////
+        if (tapsInstalled.containsKey(nodeId)) {
+        	for (String tapId: tapsInstalled.get(nodeId)){
+        		String flowIdStr = tapId;
+                //remove tap from tap-spec datastore	
+                InstanceIdentifier<Tap> tapIID = InstanceIdentifier.builder(TapSpec.class)
+                		.child(Tap.class, new TapKey(tapId))
+                		.build();
+                TapBuilder tapB = new TapBuilder();
+                tapB.setId(tapId);
+                GenericTransactionUtils.writeData(dataBroker, LogicalDatastoreType.CONFIGURATION, tapIID, tapB.build(), false);
+                
+                //Remove Tap from the switch
+            	FlowBuilder flowBuilder = new FlowBuilder();
+            	FlowKey key = new FlowKey(new FlowId(flowIdStr));
+            	flowBuilder.setFlowName(flowIdStr);
+            	flowBuilder.setKey(key);
+            	flowBuilder.setId(new FlowId(flowIdStr));
+            	flowBuilder.setTableId((short)0);
+                	
+            	InstanceIdentifier<Flow> flowIID = InstanceIdentifier.builder(Nodes.class)
+            			.child(Node.class, new NodeKey(nodeId))
+            			.augmentation(FlowCapableNode.class)
+            			.child(Table.class, new TableKey(flowBuilder.getTableId()))
+            			.child(Flow.class, new FlowKey(flowBuilder.getKey()))
+            			.build();
+                	
+            	GenericTransactionUtils.writeData(dataBroker, LogicalDatastoreType.CONFIGURATION, flowIID, flowBuilder.build(), false);
+            }
+        	tapsInstalled.remove(nodeId);
+        }
     }
     /////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void onNodeConnectorRemoved(NodeConnectorRemoved nodeConnectorRemoved) {
-        LOG.debug("Node connector removed {}", nodeConnectorRemoved);
+//        LOG.debug("Node connector removed {}", nodeConnectorRemoved);
     }
     /////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void onNodeUpdated(NodeUpdated nodeUpdated) {
-        LOG.debug("Node updated {}", nodeUpdated);
+//        LOG.debug("Node updated {}", nodeUpdated);
         NodeId nodeId = nodeUpdated.getId();
         
         FlowCapableNodeUpdated switchDesc = nodeUpdated.getAugmentation(FlowCapableNodeUpdated.class);
@@ -786,9 +790,9 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
         flowBuilder.setMatch(matchBuilder.build());
         flowBuilder.setInstructions(isb.build());
         
-        LOG.debug("         ---------------------------------------------------------------------     ");
-		LOG.debug("Installing ARP flow Entry.");
-		LOG.debug("         ---------------------------------------------------------------------     ");
+//        LOG.debug("         ---------------------------------------------------------------------     ");
+//		LOG.debug("Installing ARP flow Entry.");
+//		LOG.debug("         ---------------------------------------------------------------------     ");
 		
         //Program flow by adding it to the flow table in the opendaylight-inventory
         InstanceIdentifier<Flow> flowIID = InstanceIdentifier.builder(Nodes.class)
@@ -800,9 +804,9 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
         
         boolean status = GenericTransactionUtils.writeData(dataBroker, LogicalDatastoreType.CONFIGURATION, flowIID, flowBuilder.build(), true);
         if (status == true){
-        	LOG.debug("         ---------------------------------------------------------------------     ");
-    		LOG.debug("					   Flow is added on node startup");
-    		LOG.debug("         ---------------------------------------------------------------------     ");
+//        	LOG.debug("         ---------------------------------------------------------------------     ");
+//    		LOG.debug("					   Flow is added on node startup");
+//    		LOG.debug("         ---------------------------------------------------------------------     ");
         }
        
       /*
@@ -837,7 +841,7 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
     /////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void onNodeConnectorUpdated(NodeConnectorUpdated nodeConnectorUpdated) {
-        LOG.debug("NodeConnector updated {}", nodeConnectorUpdated);
+//        LOG.debug("NodeConnector updated {}", nodeConnectorUpdated);
         NodeId nodeId = InventoryUtils.getNodeId(nodeConnectorUpdated.getNodeConnectorRef());
         FlowCapableNodeConnectorUpdated portDesc = nodeConnectorUpdated.getAugmentation(FlowCapableNodeConnectorUpdated.class);
         if (portDesc != null) {
@@ -847,9 +851,9 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
     /////////////////////////////////////////////////////////////////////////////////////
 	@Override
 	public Future<RpcResult<AddTapOutput>> addTap(AddTapInput input) {
-		LOG.debug("         ---------------------------------------------------------------------     ");
-		LOG.debug("Add Tap RPC is Called.");
-		LOG.debug("         ---------------------------------------------------------------------     ");
+//		LOG.debug("         ---------------------------------------------------------------------     ");
+//		LOG.debug("Add Tap RPC is Called.");
+//		LOG.debug("         ---------------------------------------------------------------------     ");
 		
 		List<Tap1> tap1 = input.getTap1();
 		Tap1 tappy = tap1.get(0);
@@ -881,9 +885,9 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
 		
 		
 
-		LOG.debug("         ---------------------------------------------------------------------     ");
-		LOG.debug("Finished building the TapBuilder.");
-		LOG.debug("         ---------------------------------------------------------------------     ");
+//		LOG.debug("         ---------------------------------------------------------------------     ");
+//		LOG.debug("Finished building the TapBuilder.");
+//		LOG.debug("         ---------------------------------------------------------------------     ");
 		Tap tap = tapBuilder.build();
 		
 		InstanceIdentifier<Tap> tapIID = InstanceIdentifier.create(TapSpec.class)
@@ -892,9 +896,9 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
 		GenericTransactionUtils.writeData(dataBroker, LogicalDatastoreType.CONFIGURATION, tapIID, tap, true);
 		
 		String output_msg = "Tap is added to CONFIG Datastore";
-		LOG.debug("         ---------------------------------------------------------------------     ");
-		LOG.debug("Tap info added to CONFIG Datastore {}", tap);
-		LOG.debug("         ---------------------------------------------------------------------     ");
+//		LOG.debug("         ---------------------------------------------------------------------     ");
+//		LOG.debug("Tap info added to CONFIG Datastore {}", tap);
+//		LOG.debug("         ---------------------------------------------------------------------     ");
 		
 		AddTapOutput output = new AddTapOutputBuilder()
         .setStatus(output_msg)
@@ -1481,17 +1485,17 @@ public class TutorialTapProvider implements AutoCloseable, DataChangeListener, O
 				            networkLinks.add(netLinks);
 			            }       
 			            
-			            LOG.debug("         ---------------------------------------------------------------------     \n");
-			            LOG.debug("LinkId {},  linkSource {}, LinksrcTP {}, linkdst {}, linkdsttp {}", link.getLinkId().getValue(),
-			            		link.getSource().getSourceNode().getValue(), link.getSource().getSourceTp().getValue(),
-			            		link.getDestination().getDestNode().getValue(), link.getDestination().getDestNode().getValue());
-			            LOG.debug("         ---------------------------------------------------------------------     \n");
+			            //LOG.debug("         ---------------------------------------------------------------------     \n");
+			            //LOG.debug("LinkId {},  linkSource {}, LinksrcTP {}, linkdst {}, linkdsttp {}", link.getLinkId().getValue(),
+			            //		link.getSource().getSourceNode().getValue(), link.getSource().getSourceTp().getValue(),
+			            //		link.getDestination().getDestNode().getValue(), link.getDestination().getDestNode().getValue());
+			            //LOG.debug("         ---------------------------------------------------------------------     \n");
 		            }
-		            LOG.debug("         ---------------------------------------------------------------------     \n");
-		            LOG.debug("LinkId {},  linkSource {}, LinksrcTP {}, linkdst {}, linkdsttp {}", link.getLinkId().getValue(),
-		            		link.getSource().getSourceNode().getValue(), link.getSource().getSourceTp().getValue(),
-		            		link.getDestination().getDestNode().getValue(), link.getDestination().getDestNode().getValue());
-		            LOG.debug("         ---------------------------------------------------------------------     \n");
+		            //LOG.debug("         ---------------------------------------------------------------------     \n");
+		            //LOG.debug("LinkId {},  linkSource {}, LinksrcTP {}, linkdst {}, linkdsttp {}", link.getLinkId().getValue(),
+		            //		link.getSource().getSourceNode().getValue(), link.getSource().getSourceTp().getValue(),
+		            //		link.getDestination().getDestNode().getValue(), link.getDestination().getDestNode().getValue());
+		            //LOG.debug("         ---------------------------------------------------------------------     \n");
 		        }
 		        ////////////
 		        GetNetworkTopologyOutputBuilder output = new GetNetworkTopologyOutputBuilder();
